@@ -1,30 +1,27 @@
-// Scroll reveal animation
 const elements = document.querySelectorAll("[data-animate]");
 
 function revealOnScroll() {
     const windowHeight = window.innerHeight;
     const revealPoint = 100;
-    
+
     elements.forEach(el => {
         const elementTop = el.getBoundingClientRect().top;
-        
+
         if (elementTop < windowHeight - revealPoint) {
             el.classList.add("animated");
         }
     });
 }
 
-// Smooth scrolling for navigation links
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function(e) {
         e.preventDefault();
-        
+
         const targetId = this.getAttribute('href');
         if (targetId === '#') return;
-        
+
         const targetElement = document.querySelector(targetId);
         if (targetElement) {
-            // Close mobile menu if open
             const menuToggle = document.getElementById('menuToggle');
             const nav = document.querySelector('nav');
             if (nav && nav.classList.contains('active')) {
@@ -34,8 +31,7 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
                     menuToggle.setAttribute('aria-expanded', 'false');
                 }
             }
-            
-            // Scroll to target
+
             window.scrollTo({
                 top: targetElement.offsetTop - 80,
                 behavior: 'smooth'
@@ -44,13 +40,12 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     });
 });
 
-// Mobile menu toggle
 const menuToggle = document.getElementById('menuToggle');
 const nav = document.querySelector('nav');
 
 if (menuToggle && nav) {
     menuToggle.addEventListener('click', function(e) {
-        e.stopPropagation(); // Prevent event from bubbling up
+        e.stopPropagation();
         nav.classList.toggle('active');
         if (nav.classList.contains('active')) {
             this.innerHTML = '<i class="fas fa-times"></i>';
@@ -62,7 +57,6 @@ if (menuToggle && nav) {
     });
 }
 
-// Close mobile menu when clicking outside
 document.addEventListener('click', function(event) {
     if (nav && nav.classList.contains('active') &&
         !nav.contains(event.target) &&
@@ -73,7 +67,6 @@ document.addEventListener('click', function(event) {
     }
 });
 
-// Close mobile menu when clicking on a nav link
 document.querySelectorAll('.nav-link').forEach(link => {
     link.addEventListener('click', function() {
         if (nav && nav.classList.contains('active')) {
@@ -84,9 +77,7 @@ document.querySelectorAll('.nav-link').forEach(link => {
     });
 });
 
-// Add resize event listener for responsiveness
 window.addEventListener('resize', function() {
-    // Close mobile menu on resize to desktop
     if (nav && window.innerWidth > 768) {
         nav.classList.remove('active');
         if (menuToggle) {
@@ -96,58 +87,51 @@ window.addEventListener('resize', function() {
     }
 });
 
-// Contact form submission with Web3Forms
 const contactForm = document.getElementById("contactForm");
 if (contactForm) {
     contactForm.addEventListener("submit", function(e) {
         e.preventDefault();
 
-        // Check if terms checkbox is checked
         const termsCheckbox = document.getElementById("terms");
         const statusMsg = document.getElementById("statusMsg");
         const submitBtn = this.querySelector('.submit-btn');
         const originalBtnText = submitBtn.textContent;
-        
+
         if (!termsCheckbox.checked) {
             statusMsg.textContent = "Please agree to the Terms and Conditions to proceed.";
             statusMsg.style.color = "#ff4444";
             return;
         }
 
-        // Show loading message
         statusMsg.textContent = "Sending message...";
         statusMsg.style.color = "#FFD700";
         submitBtn.disabled = true;
         submitBtn.textContent = "Sending...";
 
-        // Create FormData object
         const formData = new FormData(this);
-        
-        // Add terms checkbox value
+
         formData.append("terms", termsCheckbox.checked ? "Yes" : "No");
 
-        // Submit to Web3Forms
         fetch("https://api.web3forms.com/submit", {
             method: "POST",
             body: formData
         })
         .then(async (response) => {
             const result = await response.json();
-            
+
             if (result.success) {
                 statusMsg.textContent = "Message sent successfully! I'll get back to you soon.";
-                statusMsg.style.color = "green";
-                // Reset form
+                statusMsg.style.color = "#4CAF50";
                 contactForm.reset();
             } else {
                 statusMsg.textContent = "Failed to send message. Please try again or contact directly.";
-                statusMsg.style.color = "red";
+                statusMsg.style.color = "#ff4444";
                 console.log("Error:", result);
             }
         })
         .catch((error) => {
             statusMsg.textContent = "Network error. Please try again.";
-            statusMsg.style.color = "red";
+            statusMsg.style.color = "#ff4444";
             console.log("Fetch error:", error);
         })
         .finally(() => {
@@ -157,7 +141,6 @@ if (contactForm) {
     });
 }
 
-// PDF Download functionality
 function downloadPDF() {
     console.log('Attempting to download PDF...');
     try {
@@ -171,12 +154,49 @@ function downloadPDF() {
         console.log('Download initiated');
     } catch (error) {
         console.log('Download error:', error);
-        // Fallback to opening in new tab
         window.open('Muhammad_Shahid_Portfolio.pdf', '_blank');
     }
 }
 
-// Add click event to the download button
+const header = document.querySelector('header');
+let lastScroll = 0;
+
+window.addEventListener('scroll', function() {
+    const currentScroll = window.pageYOffset;
+
+    if (currentScroll > 100) {
+        header.classList.add('scrolled');
+    } else {
+        header.classList.remove('scrolled');
+    }
+
+    lastScroll = currentScroll;
+    revealOnScroll();
+});
+
+document.querySelectorAll('.service-box, .case-box, .testimonial').forEach(box => {
+    box.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-12px) scale(1.02)';
+    });
+
+    box.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0) scale(1)';
+    });
+});
+
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('animated');
+        }
+    });
+}, {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+});
+
+elements.forEach(el => observer.observe(el));
+
 document.addEventListener('DOMContentLoaded', function() {
     const downloadBtn = document.getElementById('downloadBtn');
     if (downloadBtn) {
@@ -185,14 +205,36 @@ document.addEventListener('DOMContentLoaded', function() {
             downloadPDF();
         });
     }
-    
-    // Initialize animations
+
     revealOnScroll();
-    
-    // Add scroll event listener
+
     window.addEventListener('scroll', revealOnScroll);
-    
+
+    const navLinks = document.querySelectorAll('.nav-link');
+    navLinks.forEach(link => {
+        link.addEventListener('click', function() {
+            navLinks.forEach(l => l.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+
+    document.querySelectorAll('.btn').forEach(btn => {
+        btn.addEventListener('mouseenter', function(e) {
+            const ripple = document.createElement('span');
+            ripple.style.position = 'absolute';
+            ripple.style.borderRadius = '50%';
+            ripple.style.background = 'rgba(255, 255, 255, 0.5)';
+            ripple.style.width = ripple.style.height = '0';
+            ripple.style.left = e.offsetX + 'px';
+            ripple.style.top = e.offsetY + 'px';
+            ripple.style.pointerEvents = 'none';
+
+            this.style.position = 'relative';
+            this.appendChild(ripple);
+
+            setTimeout(() => ripple.remove(), 600);
+        });
+    });
 });
 
-// Console log for debugging
-console.log("Portfolio Loaded Successfully");
+console.log("Enhanced Portfolio Loaded Successfully");
